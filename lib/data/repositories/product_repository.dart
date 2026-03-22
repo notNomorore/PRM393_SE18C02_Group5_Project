@@ -32,4 +32,11 @@ class ProductRepository {
         .map((doc) => Product.fromFirestore(doc.data(), doc.id))
         .toList();
   }
+
+  Future<Product?> getProductById(String productId) async {
+    final doc = await _db.collection('products').doc(productId).get();
+    if (!doc.exists || doc.data() == null) return null;
+
+    return Product.fromFirestore(doc.data()!, doc.id);
+  }
 }

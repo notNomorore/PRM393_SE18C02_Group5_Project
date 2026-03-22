@@ -16,13 +16,16 @@ class Review {
   });
 
   factory Review.fromFirestore(Map<String, dynamic> data, String id) {
+    final createdAtRaw = data['createdAt'];
     return Review(
       id: id,
       userId: data['userId'],
       productId: data['productId'],
       rating: data['rating'],
       comment: data['comment'] ?? '',
-      createdAt: data['createdAt'].toDate(),
+      createdAt: createdAtRaw == null
+          ? DateTime.now()
+          : createdAtRaw.toDate(),
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../../../core/services/admin_service.dart';
 import '../../../../routes/app_router.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -10,6 +12,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final AdminService _adminService = AdminService();
 
   @override
   void initState() {
@@ -23,7 +26,18 @@ class _SplashScreenState extends State<SplashScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      Navigator.pushReplacementNamed(context, AppRouter.home);
+      final isBanned = await _adminService.isBanned();
+      if (isBanned) {
+        await FirebaseAuth.instance.signOut();
+        Navigator.pushReplacementNamed(context, AppRouter.login);
+        return;
+      }
+
+      final isAdmin = await _adminService.isAdmin();
+      Navigator.pushReplacementNamed(
+        context,
+        isAdmin ? AppRouter.admin : AppRouter.home,
+      );
     } else {
       Navigator.pushReplacementNamed(context, AppRouter.login);
     }

@@ -1,5 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+
+import '../../../../core/services/admin_service.dart';
+import '../../../../routes/app_router.dart';
 import '../controllers/auth_controller.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -11,6 +14,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final AuthController _auth = AuthController();
+  final AdminService _adminService = AdminService();
 
   bool isLogin = true;
   bool isLoading = false;
@@ -47,8 +51,12 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => isLoading = true);
     try {
       await _auth.login(email.text.trim(), password.text.trim());
+      final isAdmin = await _adminService.isAdmin();
 
-      Navigator.pushReplacementNamed(context, "/home");
+      Navigator.pushReplacementNamed(
+        context,
+        isAdmin ? AppRouter.admin : AppRouter.home,
+      );
 
     } catch (e) {
       showCenter(e.toString());
@@ -83,8 +91,12 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => isLoading = true);
     try {
       await _auth.loginWithGoogle();
+      final isAdmin = await _adminService.isAdmin();
 
-      Navigator.pushReplacementNamed(context, "/home");
+      Navigator.pushReplacementNamed(
+        context,
+        isAdmin ? AppRouter.admin : AppRouter.home,
+      );
 
     } catch (e) {
       showCenter(e.toString());

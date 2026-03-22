@@ -66,14 +66,25 @@ class AuthController {
 
   // ================= LOGIN =================
 
+  Future<void> _ensureNotBanned(String uid) async {
+    final doc = await _db.collection('users').doc(uid).get();
+    final data = doc.data() ?? {};
+    if (data['isBanned'] == true) {
+      await _auth.signOut();
+      throw "Account is banned";
+    }
+  }
+
   Future<void> login(String email, String password) async {
     try {
       validateLogin(email, password);
 
-      await _auth.signInWithEmailAndPassword(
+      final credential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      await _ensureNotBanned(credential.user!.uid);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         throw "User not found";
@@ -130,6 +141,8 @@ class AuthController {
             "createdAt": FieldValue.serverTimestamp(),
           });
         }
+
+        await _ensureNotBanned(user.uid);
       }
     } on FirebaseAuthException catch (e) {
       throw e.message ?? "Google login failed";
