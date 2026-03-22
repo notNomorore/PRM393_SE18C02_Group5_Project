@@ -8,6 +8,9 @@ import '../data/features/auth/screens/splash_screen.dart';
 import '../data/features/admin/screens/admin_coupons_screen.dart';
 import '../data/features/admin/screens/admin_dashboard_screen.dart';
 import '../data/features/admin/screens/admin_home_screen.dart';
+import '../data/features/admin/screens/admin_order_detail_screen.dart';
+import '../data/features/admin/screens/admin_orders_screen.dart';
+import '../data/features/admin/screens/admin_products_screen.dart';
 import '../data/features/admin/screens/admin_reviews_screen.dart';
 import '../data/features/admin/screens/admin_users_screen.dart';
 import '../data/features/cart/screens/cart_screen.dart';
@@ -38,6 +41,9 @@ class AppRouter {
   static const adminUsers = '/admin/users';
   static const adminReviews = '/admin/reviews';
   static const profile = '/profile';
+  static const adminProducts = '/admin/products';
+  static const adminOrders = '/admin/orders';
+  static const adminOrderDetail = '/admin/order-detail';
 
   static Map<String, WidgetBuilder> routes = {
     splash: (context) => const SplashScreen(),
@@ -54,6 +60,16 @@ class AppRouter {
     adminCoupons: (context) => const AdminCouponsScreen(),
     adminUsers: (context) => const AdminUsersScreen(),
     adminReviews: (context) => const AdminReviewsScreen(),
+    adminProducts: (context) => const AdminProductsScreen(),
+    adminOrders: (context) => const AdminOrdersScreen(),
+    adminOrderDetail: (context) {
+      final args = ModalRoute.of(context)!.settings.arguments
+          as Map<String, dynamic>;
+      return AdminOrderDetailScreen(
+        userId: args['userId'] as String,
+        orderId: args['orderId'] as String,
+      );
+    },
     profile: (context) => const ProfileScreen(),
     productDetail: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as Product;

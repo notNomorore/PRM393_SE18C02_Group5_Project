@@ -49,9 +49,12 @@ class _CouponListScreenState extends State<CouponListScreen> {
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final c = coupons[index];
+                    final condition =
+                        'Min subtotal: \$${c.minSubtotal.toStringAsFixed(2)}';
                     return ListTile(
                       title: Text('${c.title} (${c.code})'),
-                      subtitle: Text(c.description),
+                      subtitle: Text('${c.description}\n$condition'),
+                      isThreeLine: true,
                       trailing: Text(
                         c.discountType == 'fixed'
                             ? '-\$${c.discountValue}'

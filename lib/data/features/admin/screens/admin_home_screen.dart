@@ -39,10 +39,24 @@ class AdminHomeScreen extends StatelessWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.inventory_2),
+              title: const Text('Products'),
+              onTap: () {
+                Navigator.pushNamed(context, AppRouter.adminProducts);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.local_offer),
               title: const Text('Coupons'),
               onTap: () {
                 Navigator.pushNamed(context, AppRouter.adminCoupons);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.receipt_long),
+              title: const Text('Orders'),
+              onTap: () {
+                Navigator.pushNamed(context, AppRouter.adminOrders);
               },
             ),
             ListTile(

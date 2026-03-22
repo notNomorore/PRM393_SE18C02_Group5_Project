@@ -39,4 +39,48 @@ class ProductRepository {
 
     return Product.fromFirestore(doc.data()!, doc.id);
   }
+
+  Future<String> createProduct({
+    required String name,
+    required double price,
+    required String category,
+    required String image,
+    required String description,
+  }) async {
+    final doc = _db.collection('products').doc();
+    await doc.set({
+      'name': name,
+      'price': price,
+      'category': category,
+      'image': image,
+      'description': description,
+      'ratingAvg': 0,
+      'ratingCount': 0,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    return doc.id;
+  }
+
+  Future<void> updateProduct({
+    required String productId,
+    required String name,
+    required double price,
+    required String category,
+    required String image,
+    required String description,
+  }) async {
+    await _db.collection('products').doc(productId).update({
+      'name': name,
+      'price': price,
+      'category': category,
+      'image': image,
+      'description': description,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> deleteProduct(String productId) async {
+    await _db.collection('products').doc(productId).delete();
+  }
 }

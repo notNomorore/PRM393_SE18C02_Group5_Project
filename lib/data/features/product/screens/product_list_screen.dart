@@ -388,6 +388,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
             },
             icon: const Icon(Icons.person),
           ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRouter.coupons);
+            },
+            icon: const Icon(Icons.local_offer),
+          ),
           FutureBuilder<bool>(
             future: isAdminFuture,
             builder: (context, snapshot) {
