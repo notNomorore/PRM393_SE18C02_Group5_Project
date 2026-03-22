@@ -28,6 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await _controller.register(
         emailController.text.trim(),
         passwordController.text.trim(),
+        confirmController.text.trim(),
       );
 
       Navigator.pop(context);

@@ -21,48 +21,90 @@ class _AuthScreenState extends State<AuthScreen> {
 
   void toggle() => setState(() => isLogin = !isLogin);
 
-  void show(String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg)));
+  void showCenter(String msg) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.black87,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        content: Text(
+          msg,
+          style: TextStyle(color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+
+    // auto close sau 2s
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.of(context, rootNavigator: true).pop();
+    });
   }
 
   Future<void> handleLogin() async {
     setState(() => isLoading = true);
     try {
       await _auth.login(email.text.trim(), password.text.trim());
+
+      Navigator.pushReplacementNamed(context, "/home");
+
     } catch (e) {
-      show(e.toString());
+      showCenter(e.toString());
+    } finally {
+      setState(() => isLoading = false);
     }
-    setState(() => isLoading = false);
   }
 
   Future<void> handleRegister() async {
     if (password.text != confirm.text) {
-      show("Password not match");
+      showCenter("Password not match");
       return;
     }
 
     setState(() => isLoading = true);
+
     try {
-      await _auth.register(email.text.trim(), password.text.trim());
+      await _auth.register(
+        email.text.trim(),
+        password.text.trim(),
+        confirm.text.trim(),
+      );
       toggle();
     } catch (e) {
-      show(e.toString());
+      showCenter(e.toString());
+    } finally {
+      setState(() => isLoading = false); // 🔥 luôn chạy
     }
-    setState(() => isLoading = false);
   }
 
   Future<void> handleGoogle() async {
+    setState(() => isLoading = true);
     try {
       await _auth.loginWithGoogle();
+
+      Navigator.pushReplacementNamed(context, "/home");
+
     } catch (e) {
-      show(e.toString());
+      showCenter(e.toString());
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
   Future<void> handleForgot() async {
-    await _auth.forgotPassword(email.text.trim());
-    show("Check your email");
+    if (email.text.trim().isEmpty || !email.text.contains("@")) {
+      showCenter("Please enter a valid email");
+      return;
+    }
+
+    try {
+      await _auth.forgotPassword(email.text.trim());
+      showCenter("Check your email to reset password");
+    } catch (e) {
+      showCenter(e.toString());
+    }
   }
 
   @override
@@ -129,24 +171,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
                           _input(email, "Email", Icons.email),
                           _input(password, "Password", Icons.lock),
-
-                          if (!isLogin)
-                            _input(confirm, "Confirm Password", Icons.lock),
-
-                          const SizedBox(height: 20),
-
-                          isLoading
-                              ? const CircularProgressIndicator()
-                              : _mainButton(
-                            isLogin ? "Sign In" : "Sign Up",
-                            isLogin ? handleLogin : handleRegister,
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          _googleButton(handleGoogle),
-
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 5),
 
                           TextButton(
                             onPressed: handleForgot,
@@ -155,6 +180,37 @@ class _AuthScreenState extends State<AuthScreen> {
                               style: TextStyle(color: Colors.white70),
                             ),
                           ),
+                          if (!isLogin)
+                            _input(confirm, "Confirm Password", Icons.lock),
+
+                          const SizedBox(height: 20),
+
+                          isLoading
+                              ? const CircularProgressIndicator()
+                              : _mainButton(
+    isLogin ? "Sign In" : "Sign Up",
+    isLogin ? handleLogin : handleRegister,
+    ),
+
+    const SizedBox(height: 16),
+
+    Row(
+    children: [
+    Expanded(child: Divider(color: Colors.white24)),
+    Padding(
+    padding: EdgeInsets.symmetric(horizontal: 10),
+    child: Text(
+    isLogin ? "Or sign in with" : "Or sign up with",
+    style: TextStyle(color: Colors.white70),
+    ),
+    ),
+    Expanded(child: Divider(color: Colors.white24)),
+    ],
+    ),
+
+    const SizedBox(height: 12),
+
+    _googleButton(handleGoogle),
 
                           TextButton(
                             onPressed: toggle,
@@ -253,17 +309,21 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // 🔵 Google button
   Widget _googleButton(VoidCallback onTap) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: onTap,
-        icon: const Icon(Icons.g_mobiledata, size: 28),
-        label: const Text("Continue with Google"),
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          side: BorderSide(color: Colors.white.withOpacity(0.3)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: onTap,
+          icon: const Icon(Icons.g_mobiledata, size: 28),
+          label: const Text("Continue with Google"),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.red,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            side: BorderSide(color: Colors.red.shade900),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
         ),
       ),
