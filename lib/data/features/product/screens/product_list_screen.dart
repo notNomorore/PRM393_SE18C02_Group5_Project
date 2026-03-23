@@ -277,13 +277,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  Widget buildProduct(Product p) {
+  Widget buildProduct(BuildContext context, Product p) {
     final isFavorite = wishlistIds.contains(p.id);
+    final scheme = Theme.of(context).colorScheme;
+    final onSurface = scheme.onSurface;
+    final muted = onSurface.withOpacity(0.7);
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,7 +313,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   icon: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
                   ),
-                  color: isFavorite ? Colors.redAccent : Colors.white70,
+                  color: isFavorite ? scheme.error : muted,
                 ),
               ),
             ],
@@ -324,9 +328,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   p.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    color: onSurface,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
 
@@ -334,9 +338,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
                 Text(
                   "\$${p.price}",
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                    fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    color: scheme.primary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
 
@@ -351,7 +355,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       const SizedBox(width: 4),
                       Text(
                         "${p.ratingAvg} (${p.ratingCount})",
-                        style: const TextStyle(color: Colors.white70),
+                        style: TextStyle(color: muted),
                       ),
                     ],
                   ),
@@ -503,7 +507,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               arguments: p,
                             );
                           },
-                          child: buildProduct(p),
+                          child: buildProduct(context, p),
                         );
                       },
                     ),

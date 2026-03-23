@@ -78,11 +78,16 @@ class _WishlistScreenState extends State<WishlistScreen> {
     );
   }
 
-  Widget buildProduct(Product p) {
+  Widget buildProduct(BuildContext context, Product p) {
+    final scheme = Theme.of(context).colorScheme;
+    final onSurface = scheme.onSurface;
+    final muted = onSurface.withOpacity(0.7);
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,7 +110,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 top: 4,
                 child: IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  color: Colors.white70,
+                  color: muted,
                   onPressed: () => removeItem(p),
                 ),
               ),
@@ -120,17 +125,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   p.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    color: onSurface,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   "\$${p.price}",
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                    fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    color: scheme.primary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -142,7 +147,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       const SizedBox(width: 4),
                       Text(
                         "${p.ratingAvg} (${p.ratingCount})",
-                        style: const TextStyle(color: Colors.white70),
+                        style: TextStyle(color: muted),
                       ),
                     ],
                   ),
@@ -219,7 +224,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                             arguments: p,
                           );
                         },
-                        child: buildProduct(p),
+                        child: buildProduct(context, p),
                       );
                     },
                   ),

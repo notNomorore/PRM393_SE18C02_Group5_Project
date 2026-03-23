@@ -2,6 +2,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/theme/theme_controller.dart';
 import '../../../models/product_model.dart';
 import '../../../repositories/product_repository.dart';
 import '../widgets/admin_guard.dart';
@@ -40,23 +41,48 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
     }
   }
 
-  Future<String?> uploadImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
-    if (picked == null) return null;
+  Future<String?> uploadImage(BuildContext context) async {
+    try {
+      final picked = await _picker.pickImage(source: ImageSource.gallery);
+      if (picked == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No image selected or permission denied'),
+            ),
+          );
+        }
+        return null;
+      }
 
-    final bytes = await picked.readAsBytes();
-    final contentType = picked.mimeType ?? 'image/jpeg';
+      final bytes = await picked.readAsBytes();
+      final contentType = picked.mimeType ?? 'image/jpeg';
 
-    final ref = FirebaseStorage.instance.ref().child(
-          'products/${DateTime.now().millisecondsSinceEpoch}_${picked.name}',
+      final ref = FirebaseStorage.instance.ref().child(
+            'products/${DateTime.now().millisecondsSinceEpoch}_${picked.name}',
+          );
+
+      await ref.putData(
+        bytes,
+        SettableMetadata(contentType: contentType),
+      );
+
+      return await ref.getDownloadURL();
+    } on FirebaseException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Upload failed')),
         );
-
-    await ref.putData(
-      bytes,
-      SettableMetadata(contentType: contentType),
-    );
-
-    return await ref.getDownloadURL();
+      }
+      return null;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e')),
+        );
+      }
+      return null;
+    }
   }
 
   Future<void> showProductForm({Product? product}) async {
@@ -70,6 +96,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
         TextEditingController(text: product?.description ?? '');
 
     String imageUrl = product?.image ?? '';
+    bool isUploading = false;
 
     final result = await showDialog<bool>(
       context: context,
@@ -105,16 +132,40 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                         imageUrl.isEmpty ? 'No image' : 'Image selected',
                       ),
                     ),
+                    if (isUploading)
+                      const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                     TextButton(
-                      onPressed: () async {
-                        final url = await uploadImage();
-                        if (url == null) return;
-                        setLocalState(() => imageUrl = url);
-                      },
+                      onPressed: isUploading
+                          ? null
+                          : () async {
+                              setLocalState(() => isUploading = true);
+                              final url = await uploadImage(context);
+                              if (!mounted) return;
+                              setLocalState(() => isUploading = false);
+                              if (url == null) return;
+                              setLocalState(() => imageUrl = url);
+                            },
                       child: const Text('Upload'),
                     ),
                   ],
                 ),
+                if (imageUrl.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        imageUrl,
+                        height: 140,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -196,6 +247,17 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
             IconButton(
               onPressed: loadProducts,
               icon: const Icon(Icons.refresh),
+            ),
+            IconButton(
+              onPressed: ThemeController.toggle,
+              tooltip: Theme.of(context).brightness == Brightness.dark
+                  ? 'Switch to light mode'
+                  : 'Switch to dark mode',
+              icon: Icon(
+                Theme.of(context).brightness == Brightness.dark
+                    ? Icons.light_mode
+                    : Icons.dark_mode,
+              ),
             ),
           ],
         ),

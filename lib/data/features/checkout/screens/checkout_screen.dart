@@ -268,7 +268,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
                             discountNote,
-                            style: const TextStyle(color: Colors.white70),
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.7),
+                            ),
                           ),
                         ),
                       const SizedBox(height: 16),
